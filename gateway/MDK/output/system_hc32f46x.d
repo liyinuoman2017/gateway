@@ -1,0 +1,15 @@
+.\output\system_hc32f46x.o: ..\source\bsp_common\system_hc32f46x.c
+.\output\system_hc32f46x.o: ..\source\bsp_common\hc32_common.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\ARMCC\Bin\..\include\stdio.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\ARMCC\Bin\..\include\string.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\ARMCC\Bin\..\include\stddef.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\ARMCC\Bin\..\include\stdint.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\ARMCC\Bin\..\include\stdbool.h
+.\output\system_hc32f46x.o: ..\source\bsp_common\hc32f46x.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include\core_cm4.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_version.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_compiler.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include\cmsis_armcc.h
+.\output\system_hc32f46x.o: E:\00_ide_setup\keil_arm\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include\mpu_armv7.h
+.\output\system_hc32f46x.o: ..\source\bsp_common\system_hc32f46x.h
+.\output\system_hc32f46x.o: ..\source\data_task\data_task.h
