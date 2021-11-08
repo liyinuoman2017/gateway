@@ -244,7 +244,6 @@ void cloud_send_handle(u8 port)
 			clear_release_information(&ethernet_business.subscribe_data_buff[subscribe]);				
 	}		
 }
-
 /**
 *********************************************************************************************************
 * @名称	: 
@@ -311,6 +310,7 @@ void tcp_set_reply(uint8_t cmd)
 extern u8 firmware_version;
 void tcp_set_handle(uint8_t* reve_buff,int16_t reve_length)
 {
+	/*关键部分不便公开，删除处理*/	
 	if(reve_buff[0] == 0x7E)/*配置指令*/
 	{
 		/*增加 帧头 校验判断 复制数据时减去包头包尾长度类型*/
@@ -323,16 +323,6 @@ void tcp_set_handle(uint8_t* reve_buff,int16_t reve_length)
 		{	
 			write_logic_data(&reve_buff[4],reve_length - 5);
 			tcp_set_reply(reve_buff[3]);		
-		}
-		else if(reve_buff[3] == 0x02)/*房间配置 */
-		{	
-			write_room_data(&reve_buff[4] , reve_length - 5 );	
-			tcp_set_reply(reve_buff[3]);
-		}
-		else if(reve_buff[3] == 0x01)/*系统配置*/
-		{	
-			write_set_data(&reve_buff[4],reve_length - 5);	
-			tcp_set_reply(reve_buff[3]);			
 		}
 		else if(reve_buff[3] == 0x7B)/* 调试指令开关*/
 		{

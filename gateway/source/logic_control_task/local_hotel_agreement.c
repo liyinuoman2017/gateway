@@ -302,13 +302,6 @@ void combined_byte_mapping(lamp_status_t* lamp_buff, u8 combined , u8 cmd)
 		else if(combined < 16)
 			lamp_buff->combination[1] &= ~(0x01<<(combined-8));	
 	}
-	else if(cmd == 0)/*取反*/	
-	{
-		if(combined < 8)
-			lamp_buff->combination[0] ^= (0x01<<combined);
-		else if(combined < 16)
-			lamp_buff->combination[1] ^= (0x01<<(combined-8));			
-	}
 }
 /**
 *********************************************************************************************************
@@ -348,17 +341,6 @@ u16 combination_lamp_update_status(lamp_status_t* lamp_buff ,scene_buff_t *mode_
 		for(u8 i = 0; i < 40 ; i ++)
 			if( mode_buff->data[ 11 + i ] != 0xff) /*不处理nc状态*/
 				lamp_buff->lamp_buff[ i ] =	 mode_buff->data[ 11 + i ];
-	}
-	else if(cmd == 0) /*组合数据取反*/
-	{
-		for(u8 i = 0; i < 40 ; i ++)
-			if( mode_buff->data[ 11 + i ] != 0xff) /*不处理nc状态*/
-			{
-				if( mode_buff->data[ 11 + i ] == 0)
-					lamp_buff->lamp_buff[ i ] =	 100;
-				else
-					lamp_buff->lamp_buff[ i ] =	 0;
-			}
 	}	
 	/*延时*/				
 	return ((u16)mode_buff->data[ 9 ]*256 + mode_buff->data[ 10 ]);	
@@ -389,16 +371,6 @@ void combination_state_synchronization(u8* lamp_buff , u8 * combination_state)
 				else
 					contrary_flag = 1;			
 			}
-		}
-		/*与组合数据一致*/
-		if((identical_flag == 0)&& (contrary_flag == 1)) 
-		{
-			combination_state[i] = 1;
-		}
-		/*与组合数据取反一致*/
-		else if((identical_flag == 1)&& (contrary_flag == 0))
-		{
-			combination_state[i] = 0;
 		}		
 	}		
 }
@@ -438,10 +410,6 @@ void service_transformation(u8* key_buff)
 	else if(key_buff[STATUS_BYTE]  == 2)/*置0*/
 	{
 		service_pointer[ service_maping[ key_buff[DATA_BYTE] - 20 ] ] = 0;
-	}
-	else if(key_buff[STATUS_BYTE]  == 0)/*取反*/	
-	{
-		service_pointer[ service_maping[ key_buff[DATA_BYTE] - 20 ] ] = !service_pointer[ service_maping[ key_buff[DATA_BYTE] - 20 ] ] ;			
 	}		
 }
 /**
@@ -477,10 +445,6 @@ static void hotle_agreement_lamp_handle(u8* key_buff, data_container_t  *current
 	/*灯更新总状态*/
 	if(key_buff[STATUS_BYTE] == 0)/*灯取反*/
 		current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START] = !	current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START];
-	else if(key_buff[STATUS_BYTE] == 1)/*灯开*/
-		current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START] = 1;
-	else if(key_buff[STATUS_BYTE] == 2)/*灯关*/
-		current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START] = 0;
 	/*灯开为100 兼容调光灯*/
 	if(current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START] == 1)
 		current_user.lamp.lamp_buff[ key_buff[DATA_BYTE] - KEY_VALUE_LAMP_START] = 100;
@@ -531,11 +495,7 @@ static void hotle_agreement_combination_handle(u8* key_buff, data_container_t  *
 		combination_num = key_buff[DATA_BYTE]-KEY_VALUE_COMBINATION_START;
 		combined_byte_mapping(&current_user.lamp, combination_num ,key_buff[STATUS_BYTE]);
 		if(key_buff[STATUS_BYTE] == 0)
-			combination_state_buff[combination_num] = !combination_state_buff[combination_num];
-		if(key_buff[STATUS_BYTE] == 1)
-			combination_state_buff[combination_num] = 1;
-		if(key_buff[STATUS_BYTE] == 2)
-			combination_state_buff[combination_num] = 0;			
+			combination_state_buff[combination_num] = !combination_state_buff[combination_num];			
 		/*更新灯状态*/
 		lamp_delay =combination_lamp_update_status(&current_user.lamp, &user_system_data.scene.scene_data[ key_buff[DATA_BYTE] - KEY_VALUE_SECEN_START] ,combination_state_buff[combination_num]);
 		/*灯指令打包*/
@@ -575,14 +535,6 @@ static void hotle_agreement_handle(u8* key_buff, data_container_t  *current_data
 	else if((key_buff[DATA_BYTE] >= KEY_VALUE_SECEN_START) && (key_buff[DATA_BYTE] <= KEY_VALUE_SECEN_END))/*场景 模式 192~207  */
 	{
 		hotle_agreement_scene_handle(key_buff, current_data_container);
-	}
-	else if((key_buff[DATA_BYTE] >= KEY_VALUE_COMBINATION_START) && (key_buff[DATA_BYTE] <= KEY_VALUE_COMBINATION_END))/* 组合 208~223操作*/
-	{
-		hotle_agreement_combination_handle(key_buff, current_data_container);
-	}
-	else if((key_buff[DATA_BYTE] >= KEY_VALUE_SERVICE_START) && (key_buff[DATA_BYTE] <= KEY_VALUE_SERVICE_END))/* 服务 20~27*/
-	{
-		hotle_agreement_service_handle(key_buff, current_data_container);
 	}
 	else if(key_buff[DATA_BYTE] == 30)/* 开锁*/
 	{
@@ -630,13 +582,6 @@ void inside_lookup_handle(u8* key_buff,u8 type , data_container_t  *current_data
 						if( 1 == ethernet_debug_flag )	
 							debug_ethernet_transmission(user_system_data.logic.inside_table[i].buff , user_system_data.logic.inside_table[i].length , 0x71, 0x7b);
 						
-					}
-					else if(user_system_data.logic.inside_table[i].type == 1)
-					{
-						name_length = sizeof("logic_rs485outside");
-						memcpy(name_buff , "logic_rs485outside" ,sizeof("logic_rs485outside"));
-						/*调试信息上报*/
-						debug_ethernet_transmission(user_system_data.logic.inside_table[i].buff , user_system_data.logic.inside_table[i].length , 0x72, 0x7b);						
 					}				
 					else
 					{
@@ -692,14 +637,6 @@ void outside_lookup_handle(u8* key_buff,u8 type, data_container_t  *current_data
 						/*调试信息上报*/
 						if( 1 == ethernet_debug_flag )
 							debug_ethernet_transmission(user_system_data.logic.outside_table[i].buff , user_system_data.logic.outside_table[i].length , 0x71, 0x7b);	
-					}
-					else if(user_system_data.logic.outside_table[i].type == 1)
-					{
-						name_length = sizeof("logic_rs485outside");
-						memcpy(name_buff , "logic_rs485outside" ,sizeof("logic_rs485outside"));
-						/*调试信息上报*/
-						if( 1 == ethernet_debug_flag )
-							debug_ethernet_transmission(user_system_data.logic.outside_table[i].buff , user_system_data.logic.outside_table[i].length , 0x72, 0x7b);							
 					}				
 					else
 					{

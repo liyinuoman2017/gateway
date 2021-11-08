@@ -266,36 +266,7 @@ void key_card_power_on_judge(key_value_t *key_logic)
 			
 			user_logic.power_on_card = 0;
 		}
-		else
-		{
-			/*取反*/
-			if(0 == user_logic.power_on_card )
-			{
-				/*插卡*/
-				key_buff[STATUS_BYTE] =  0;
-				key_buff[DATA_BYTE] = 192; 
-				key_write_directional_cache(key_buff, 0, &user_key_execute);
-				/*清除拔卡延时*/
-				key_delay_buff_directional_clear(193);
-				
-				user_logic.power_on_card = 1;				
-			}
-			else
-			{
-					/*拔卡*/
-				key_buff[STATUS_BYTE] =  0;			
-				key_buff[DATA_BYTE] = 193;
-				
-				if(user_system_data.set.pick_up_card_delay[1] > 60)
-					key_delay_buff_write(key_buff, 0, 6000);
-				else
-					key_delay_buff_write(key_buff, 0, user_system_data.set.pick_up_card_delay[1]*100);					
-				user_logic.power_on_card = 0;		
-			}
-		
-		}
-	}
-	
+	}	
 	/*  判断映射控制中的 不受插卡限制的指令*/	
 	if(user_logic.power_on_card == 0)
 	{
@@ -346,18 +317,6 @@ void key_mutex_judge(key_value_t *key_logic)
 			key_buff[DATA_BYTE] = 22;
 			key_write_directional_cache(key_buff, 0, &user_key_execute);
 		}
-	}
-	/*退房*/	
-	if(key_logic->buff[DATA_BYTE] == 23)	
-	{
-		/*开清扫*/
-		key_buff[STATUS_BYTE] =  1;				
-		key_buff[DATA_BYTE] = 22;
-		key_write_directional_cache(key_buff, 0, &user_key_execute);
-		/*关勿扰*/
-		key_buff[STATUS_BYTE] =  2;				
-		key_buff[DATA_BYTE] = 24;
-		key_write_directional_cache(key_buff, 0, &user_key_execute);
 	}	
 }
 /**
@@ -383,17 +342,6 @@ void key_mapping_judge(key_value_t *key_logic)
 					key_buff[STATUS_BYTE] =  0;			
 					key_buff[DATA_BYTE] = KEY_VALUE_LAMP_START - 1 + user_system_data.set.user_mapping_set[i].channel;	
 					key_delay_buff_write(key_buff, 0, ((u16)(user_system_data.set.user_mapping_set[i].delay[0]<<8) + user_system_data.set.user_mapping_set[i].delay[1])*100);				
-				}
-				else if(user_system_data.set.user_mapping_set[i].trigger == 1)/*延时恢复类型  先开 延时关*/
-				{
-					/*发送开*/
-					key_buff[STATUS_BYTE] =  1;			
-					key_buff[DATA_BYTE] = KEY_VALUE_LAMP_START- 1 + user_system_data.set.user_mapping_set[i].channel;						
-					key_write_directional_cache(key_buff, 0, &user_key_execute);
-					/*延时发送关*/
-					key_buff[STATUS_BYTE] =  2;			
-					key_buff[DATA_BYTE] = KEY_VALUE_LAMP_START- 1 + user_system_data.set.user_mapping_set[i].channel;	
-					key_delay_buff_write(key_buff, 0, ((u16)(user_system_data.set.user_mapping_set[i].delay[0]<<8) + user_system_data.set.user_mapping_set[i].delay[1])*100);					
 				}	
 				else if(user_system_data.set.user_mapping_set[i].trigger == 2)/*延时触发类型   延时一段时间后开*/
 				{
